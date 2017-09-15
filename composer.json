@@ -1,0 +1,19 @@
+{
+    "name": "uFramework",
+    "description": "Simple and Minimal PHP framework",
+    "type": "project",
+    "license": "mpl-2.0",
+    "authors": [{
+            "name": "Jonathan Esquivel",
+            "email": "jonathan@irrelevant.com.co",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+	        "Core\\": "Core/",
+            "Application\\" : "Application/"
+        }
+    }
+}
