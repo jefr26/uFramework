@@ -10,7 +10,8 @@
 
 namespace Application\Controllers;
 
-use \Core\Application;
+use Core\Application;
+use Application\Models\TestModel;
 
 /**
  * Default controller
@@ -20,6 +21,15 @@ class DefaultController extends Application
 
     public function index()
     {
+
+        echo '<pre>';
         echo 'Hello World!';
+
+        echo "\n";
+
+        $test = new TestModel();
+        print_r($test->testFunction());
+
+        echo "\n";
     }
 }

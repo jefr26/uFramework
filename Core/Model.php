@@ -2,130 +2,61 @@
 
 namespace Core;
 
-use \PDO;
-use Core\Libs\Helper;
+use Symfony\Component\Yaml\Yaml;
 
+/**
+ * uFramework - Simple and Minimal PHP framework
+ *
+ * @package uFramework
+ * @author Jonathan Esquivel
+ * @link https://github.com/jefr26/uFramework/
+ * @license https://choosealicense.com/licenses/mpl-2.0/ Mozilla Public License 2.0
+ */
 class Model
 {
     /**
-     * @var null Database Connection
+     * configuration data
+     * @var null
+     */
+    private $conf = null;
+
+    /**
+     * database object
+     * @var null
      */
     public $db = null;
 
     /**
-     * @var null Database info
+     * load configuration and make the connection
+     * @param string $database name of the connection to use
      */
-    private static $database = null;
-
-    /**
-     *
-     */
-    public $debug = false;
-
-    /**
-     * Whenever model is created, open a database connection.
-     */
-    public function __construct()
+    public function __construct($database = 'default')
     {
-        // Load database config
-        require_once APP . 'config/database.php';
-        self::$database = $database;
-
         try {
-            self::openDatabaseConnection();
-        } catch (\PDOException $e) {
-            error_log($e);
-            exit('Database connection could not be established.');
-        }
-    }
-
-    /**
-     * Make the connection
-     * @access private
-     * @return void
-     */
-    private function openDatabaseConnection()
-    {
-        // database connection options
-        $options = array(
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_AUTOCOMMIT => false,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::ATTR_CASE => PDO::CASE_LOWER,
-        );
-
-        // extra options
-        switch (self::$database['DB_TYPE']) {
-            case 'oci':
-                $options[PDO::ATTR_ORACLE_NULLS] = PDO::NULL_EMPTY_STRING;
-                break;
-            case 'pgsql':
-                $charset = 'options=\'--client_encoding=' . self::$database['DB_CHARSET'];
-                break;
-            default:
-                $charset = 'charset=' . self::$database['DB_CHARSET'];
-                break;
-        }
-
-        // make the connection
-        try {
-            $this->db = new PDO(
-                self::$database['DB_TYPE'] . ':host=' . self::$database['DB_HOST'] . ';dbname=' . self::$database['DB_NAME'] . ';' . $charset,
-                self::$database['DB_USER'],
-                self::$database['DB_PASS']
-            );
+            $file = file_get_contents(ROOT . 'config/database.yml');
         } catch (Exception $e) {
-            error_log('Database connection could not be established: ' . $e);
+            die("Error loading database configuration file: $e");
         }
+        $this->conf = Yaml::parse($file)['database'][$database];
+        $this->connection();
     }
 
     /**
-     * Permite ejecutar una consulta en la base de datos.
-     * @param  string     $sql    Consulta a ejecutar
-     * @param  array|null $args   Arreglo con los parametros
-     * @return object|bool
+     * make the connection
+     * @return object
      */
-    public function query(string $sql, array $args = null)
+    private function connection()
     {
-        if (!$args) {
-             return $this->query($sql);
-        }
-
-        // Debug de la consulta que se esta ejecutando
-        if ($this->debug) {
-            Helper::debug($sql, $args);
-        }
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($args);
-        return $stmt;
-    }
-
-    /**
-     * Cerrar la conexion al destruir el objeto
-     * @return void
-     */
-    final public function __destruct()
-    {
-        $this->db = null;
-    }
-
-    /**
-     * Evita que el objeto sea clonado
-     * @return void
-     */
-    final public function __clone()
-    {
-        $this->db = null;
-    }
-
-    /**
-     * Evita que el objeto sea serializado
-     * @return void
-     */
-    final public function __wakeup()
-    {
-        $this->db = null;
+        $connParams = array(
+            'driver' => $this->conf['type'],
+            'host' => $this->conf['server'],
+            'port' => $this->conf['port'],
+            'dbname' => $this->conf['dbname'],
+            'user' => $this->conf['user'],
+            'password' => $this->conf['pass'],
+            'charset' => !empty($this->conf['charset']) ? $this->conf['charset'] : 'utf8'
+        );
+        $config = new \Doctrine\DBAL\Configuration();
+        $this->db = \Doctrine\DBAL\DriverManager::getConnection($connParams, $config);
     }
 }

@@ -31,8 +31,25 @@ define('APP', ROOT . 'Application' . DIRECTORY_SEPARATOR);
 // This is the auto-loader for Composer-dependencies (to load tools into your project).
 require ROOT . 'vendor/autoload.php';
 
-// load application config (error reporting etc.)
-require ROOT . 'config/config.php';
+// Configuration for: Error reporting
+// Useful to show every little problem during development, but only show hard
+// errors in production
+define('ENVIRONMENT', 'development');
+if (ENVIRONMENT == 'development' || ENVIRONMENT == 'dev') {
+    error_reporting(E_ALL);
+    ini_set("display_errors", 1);
+}
+
+// Configuration for: URL
+define('URL_PUBLIC_FOLDER', 'public');
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+define('URL_PROTOCOL', $protocol);
+define('URL_DOMAIN', $_SERVER['HTTP_HOST']);
+define('URL_SUB_FOLDER', str_replace(URL_PUBLIC_FOLDER, '', dirname($_SERVER['SCRIPT_NAME'])));
+define('URL', URL_PROTOCOL . URL_DOMAIN . URL_SUB_FOLDER);
+
+// Default controller
+define('DEFAULT_CONTROLLER', 'DefaultController');
 
 // load application class
 use Core\Application;

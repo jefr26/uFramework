@@ -13,7 +13,14 @@
     "autoload": {
         "psr-4": {
 	        "Core\\": "Core/",
-            "Application\\" : "Application/"
+            "Application\\" : "Application/",
+            "Libs\\" : "Libs/"
         }
+    },
+    "require": {
+        "symfony/yaml": "^4.0@dev",
+        "respect/validation": "^1.1",
+        "doctrine/dbal": "^2.8@dev",
+        "twig/twig": "2.x-dev"
     }
 }

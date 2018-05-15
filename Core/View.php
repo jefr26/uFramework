@@ -2,77 +2,55 @@
 
 namespace Core;
 
+use Twig_Loader_Filesystem;
+use Twig_Environment;
+
 /**
- * Clase para renderizar las vistas solicitadas
- * @package Ofrfeo\Core
+ * Class for render views using Twig
+ *
+ * @package uFramework
+ * @author Jonathan Esquivel
+ * @link https://github.com/jefr26/uFramework/
+ * @license https://choosealicense.com/licenses/mpl-2.0/ Mozilla Public License 2.0
  */
-class View
+class Views
 {
     /**
-     * Vista a cargar
-     * @var string
-     */
-    private $view = '';
-
-    /**
-     * Datos que se le pasan a la vista
-     * @var null
-     */
-    private $data = null;
-
-    /**
-     * Variable para determinar se debe cargar la plantilla predeterminada
-     * @var null
-     */
-    private $template = null;
-
-
-    /**
-     * Setea las variables para poder renderizar las vistas
-     * @param string      $view     Ruta relativa de la vista.
-     * @param array|null  $data     Arreglo con los datos a pasar.
-     * @param string|null $template Variable que determina si se debe renderizar
-     *                              la plantilla.
+     * Create cache dir if not exist
      * @return void
      */
-    public function __construct(string $view, array $data = null, bool $template = true)
+    public function __construct()
     {
-        $this->view = $view;
-        $this->data = $data;
-        $this->template = $template;
+        if (!is_dir(ROOT . 'cache')) {
+            mkdir(ROOT . 'cache', 0777);
+        }
+        return $this;
     }
 
     /**
-     * Rdenderiza la vista seleccionada
+     * Render the view with the data
+     * @param string    $view     View route
+     * @param array     $data     Array with the data
      * @return void
      */
-    public function render()
+    public function render(string $view, array $data)
     {
-        // Extrae los datos del arregloe
-        (is_array($this->data) ? extract($this->data) : null);
+        // Public URL
+        $data['url'] = URL;
 
-        ob_start();
-        // Si se va a cargar la plantilla
-        if ($this->template) {
-            include_once APP . 'view/_templates/header.php';
-        }
+        // Load application views
+        $loader = new Twig_Loader_Filesystem(APP . "Views");
+        $twig = new Twig_Environment(
+            $loader,
+            array(
+                'cache' => ROOT . 'cache',
+                'debug' => true,
+                'auto_reload' => true,
+                'strict_variables' => true,
+            ));
 
-        // Si existe la vista se carga, de lo contrario se muestra la pagina de
-        // error
-        if (file_exists(APP . 'view/' . $this->view . '.php')) {
-            include_once APP . 'view/' . $this->view . '.php';
-        } else {
-            include_once APP . 'view/error/404.php';
-        }
-
-        // Si se va a cargar la plantilla
-        if ($this->template) {
-            include_once APP . 'view/_templates/footer.php';
-        }
-
-        $html = ob_get_contents();
-        ob_end_clean();
-        echo $html;
+        $twig->AddExtension(new \Twig_Extension_Debug());
+        echo $twig->render($view . '.twig', $data);
         exit;
     }
 }

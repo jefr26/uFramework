@@ -1,0 +1,41 @@
+database:
+    default:
+        # ej: mysql, mysqli, pdo_mysql
+        type: pdo_mysql
+        server: localhost
+        port: 3306
+        dbname: db_name
+        user: user
+        pass: password
+        charset: utf8
+    postgres:
+        # ej: psql, pdo_pgsql
+        type: pdo_pgsql
+        server: localhost
+        port: 5436
+        dbname: db_name
+        user: user
+        pass: password
+    oracle:
+        type: oci8
+        # ej: localhost/XE
+        #      or
+        #     (DESCRIPTION =
+        #       (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.oracle.com)(PORT = 1521))
+        #       (CONNECT_DATA =
+        #         (SERVER = DEDICATED)
+        #         (SERVICE_NAME = XE)
+        #       )
+        #     )
+        server: localhost/XE
+        user: user
+        pass: password
+    mssql:
+        type: sqlsrv
+        #  ej: 'serverName\sqlexpress'
+        #       or
+        #     'serverName\sqlexpress, 1433'
+        server: 'localhost\sqlexpress'
+        dbname: test
+        user: user
+        pass: password

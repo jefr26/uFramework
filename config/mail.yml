@@ -1,0 +1,9 @@
+mail:
+    server: ''
+    debug: false
+    smtp: true
+    smtp_auth: false
+    smtp_secure: tls
+    port: 25
+    user: ''
+    pass: ''
